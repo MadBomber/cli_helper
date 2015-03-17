@@ -7,8 +7,7 @@
 ##  By:   Dewayne VanHoozer (dvanhoozer@gmail.com)
 #
 
-#require 'cli_helper'
-require_relative '../lib/cli_helper'
+require 'cli_helper'
 
 $options[:version] = '0.0.1' # the version of this utility program
 
@@ -28,7 +27,10 @@ cli_helper("An example use of cli_helper") do |o|
 
   o.string  '-s', '--string', 'example string parameter',  default: 'IamDefault'
   o.int     '-i', '--int',    'example integer parameter', default: 42
-  o.float   '-f', '--float',  'example float parameter', default: 22.0 / 7.0
+
+  # FIXME: an issue with Slop
+  #o.float   '-f', '--float',  'example float parameter', default: (22.0 / 7.0)
+
   o.array   '-a', '--array',  'example array parameter',   default: [:bob, :carol, :ted, :alice]
   o.path    '-p', '--path',   'example Pathname parameter', default: Pathname.new('default/path/to/file.txt')
   o.paths         '--paths',  'example Pathnames parameter', delimiter: ',', default: ['default/path/to/file.txt', 'file2.txt'].map{|f| Pathname.new f}
