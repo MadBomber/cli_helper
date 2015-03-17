@@ -13,7 +13,6 @@ Gem::Specification.new do |spec|
   spec.homepage      = "http://github.com/MadBomber/cli_helper"
   spec.license       = "You want it?  Its yours."
 
-  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.require_paths = ["lib"]
 
   spec.add_dependency 'slop'

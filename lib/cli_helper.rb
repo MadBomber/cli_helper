@@ -162,7 +162,7 @@ def abort_if_errors
       STDERR.puts "\tWarning: #{w}"
     end
     STDERR.print "\nAbort program? (y/N) "
-    answer = (gets).chomp.strip.downcase
+    answer = (STDIN.gets).chomp.strip.downcase
     $errors << "Aborted by user" if answer.size>0 && 'y' == answer[0]
     $warnings = []
   end
