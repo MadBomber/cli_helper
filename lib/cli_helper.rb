@@ -56,33 +56,26 @@ $options = {
 $options[:my_dir]   = $options[:me].parent
 $options[:my_name]  = $options[:me].basename.to_s
 
+# Return full pathname of program
 def me
   $options[:me]
 end
 
+# Returns the basename of the program as a string
 def my_name
   $options[:my_name]
 end
 
+# Returns the version of the program as a string
 def version
   $options[:version]
 end
 
-def verbose?
-  $options[:verbose]
-end
-
-def debug?
-  $options[:debug]
-end
-
-def help?
-  $options[:help]
-end
-
-
+# Invoke Slop with common CLI parameters and custom
+# parameters provided via a block.  Create '?'
+# for all boolean parameters that have a '--name' flag form.
+# Returns a Slop::Options object
 def cli_helper(my_banner='')
-
   param = Slop::Options.new
 
   if my_banner.empty?
@@ -114,27 +107,44 @@ def cli_helper(my_banner='')
   $options.merge!($cli.to_hash)
   $options[:arguments] = $cli.arguments
 
+
+  bools = param.options.select do |o|
+    o.is_a? Slop::BoolOption
+  end.select{|o| o.flags.select{|f|f.start_with?('--')}}.
+      map{|o| o.flags.last.gsub('--','')} # SMELL: depends on convention
+
+  bools.each do |m|
+    s = m.to_sym
+    define_method(m+'?') do
+      $options[s]
+    end unless self.respond_to?(m+'?')
+    define_method(m+'!') do
+      $options[s] = true
+    end unless self.respond_to?(m+'!')
+  end
+
   if help?
     show_usage
     exit
   end
 
+  return param
 end # cli_helper
 
-
+# Returns the usage/help information as a string
 def usage
   a_string = $cli.to_s + "\n"
   a_string += HELP + "\n" if defined?(HELP)
   return a_string
 end
 
-
+# Prints to STDOUT the usage/help string
 def show_usage
   puts usage()
 end
 
 
-# only gets valid files of one type
+# Returns an array of valid files of one type
 def get_pathnames_from(an_array, extnames=['.json', '.txt', '.docx'])
   an_array = [an_array] unless an_array.is_a? Array
   extnames = [extnames] unless extnames.is_a? Array
@@ -178,10 +188,12 @@ def abort_if_errors
   end
 end # def abort_if_errors
 
+# Adds a string to the global $errors array
 def error(a_string)
   $errors << a_string
 end
 
+# Adds a string to the global $warnings array
 def warning(a_string)
   $warnings << a_string
 end
@@ -192,13 +204,31 @@ __END__
 ## Here is how it works
 
 Test '000 supports basic common parameters' do
-  cli_helper
+  params = cli_helper
+  assert params.is_a? Slop::Options
   assert usage.include?('--help')
   assert usage.include?('--debug')
   assert usage.include?('--verbose')
   assert usage.include?('--version')
   refute usage.include?('--xyzzy')
 end
+
+=begin
+# NOTE: The Test construct creates a dynamic class which
+# does not incorporate 'define_method'  This Test results
+# in errors that are a consequence of the testing framework
+# not the object under test.
+Test '002 creates accessor methods to boolean options' do
+  cli_helper
+  all_methods = methods
+  %w[ help? debug? verbose? version?
+      help! debug! verbose! version!].each do |m|
+    assert all_methods.include?(m)
+  end
+  refute all_methods.include?('xyzzy?')
+  refute all_methods.include?('xyzzy!')
+end
+=end
 
 Test '005 block inclusion' do
   cli_helper do |param|
