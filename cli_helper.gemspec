@@ -22,6 +22,10 @@ Gem::Specification.new do |spec|
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.require_paths = ["lib"]
 
+  if spec.respond_to?(:metadata)
+    spec.metadata['allowed_push_host'] = 'http://mygemserver.com'
+  end
+
   spec.add_dependency 'slop'
   spec.add_dependency 'nenv'
   spec.add_dependency 'awesome_print'
