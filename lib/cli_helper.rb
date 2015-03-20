@@ -31,10 +31,20 @@ module Slop
       Pathname.new(value)
     end
   end
+
   class PathsOption < ArrayOption
     def finish(opts)
       self.value = value.map { |f| Pathname.new(f) }
     end
+  end
+
+  # An example of how to incorporate default values into
+  # the usage help text.  Would prefer a generic solution
+  # in the base Option class.
+  class StringOption
+    #def to_s(offset: 0)
+    #  "%-#{offset}s=%s  %s" % [flag, default_value, desc]
+    #end
   end
 end # module Slop
 
