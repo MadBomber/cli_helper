@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = "cli_helper"
-  spec.version       = '0.0.3'
+  spec.version       = '0.0.4'
   spec.authors       = ["Dewayne VanHoozer"]
   spec.email         = ["dvanhoozer@gmail.com"]
 
@@ -26,13 +26,13 @@ Gem::Specification.new do |spec|
     spec.metadata['allowed_push_host'] = 'https://rubygems.org'
   end
 
-  spec.add_dependency 'slop'
+  spec.add_dependency 'slop', "~> 4.0"
   spec.add_dependency 'nenv'
   spec.add_dependency 'awesome_print'
   spec.add_dependency 'debug_me'
 
 
-  spec.add_development_dependency "bundler", "~> 1.8"
+  spec.add_development_dependency "bundler", "~> 1.9"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency 'test_inline'
 
