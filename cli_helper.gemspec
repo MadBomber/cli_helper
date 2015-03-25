@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   end
 
   spec.add_dependency 'slop', "~> 4.0"
+  spec.add_dependency 'hashie'
   spec.add_dependency 'nenv'
   spec.add_dependency 'awesome_print'
   spec.add_dependency 'debug_me'
