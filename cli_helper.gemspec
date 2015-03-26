@@ -27,7 +27,8 @@ Gem::Specification.new do |spec|
   end
 
   spec.add_dependency 'slop', "~> 4.0"
-  spec.add_dependency 'hashie'
+  spec.add_dependency 'configatron'
+  spec.add_dependency 'parseconfig'
   spec.add_dependency 'nenv'
   spec.add_dependency 'awesome_print'
   spec.add_dependency 'debug_me'
@@ -35,6 +36,6 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.9"
   spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency 'test_inline'
+  spec.add_development_dependency 'kick_the_tires'
 
 end

@@ -3,23 +3,25 @@
 ## Here is how it works
 
 require_relative '../lib/cli_helper'
-c = CliHelper.new
+include CliHelper
 
 
-
+# can not use minitest because it requires pry which
+# requires an older version of slop
 #require 'minitest/autorun'
 require 'kick_the_tires'
+include KickTheTires
 
 #describe 'how it works' do
 
 #it '000 supports basic common parameters' do
-  params = c.cli_helper
+  params = cli_helper
   assert params.is_a? Slop::Options
-  assert c.usage.include?('--help')
-  assert c.usage.include?('--debug')
-  assert c.usage.include?('--verbose')
-  assert c.usage.include?('--version')
-  refute c.usage.include?('--xyzzy')
+  assert usage.include?('--help')
+  assert usage.include?('--debug')
+  assert usage.include?('--verbose')
+  assert usage.include?('--version')
+  refute usage.include?('--xyzzy')
 #end
 
 =begin
@@ -40,22 +42,22 @@ end
 =end
 
 #it '005 block inclusion' do
-  c.cli_helper do |param|
+  cli_helper do |param|
     param.string '-x', '--xyxxy', 'example MAGIC parameter',  default: 'IamDefault'
   end
   assert usage.include?('MAGIC')
 #end
 
 #it '010 supports banner' do
-  refute c.usage().include?('BANNER')
-  c.cli_helper('This is my BANNER')
-  assert c.usage().include?('BANNER')
+  refute usage().include?('BANNER')
+  cli_helper('This is my BANNER')
+  assert usage().include?('BANNER')
 #end
 
 #it '015 supports additional help in usage' do
-  refute c.usage.include?('HELP')
+  refute usage.include?('HELP')
   HELP = "Do you need some HELP?"
-  assert c.usage.include?('HELP')
+  assert usage.include?('HELP')
 #end
 
 #it '020 put it all together' do
@@ -63,43 +65,43 @@ end
     o.string '-x', '--xyxxy', 'example MAGIC parameter',  default: 'IamDefault'
   end
   HELP = "Do you need some HELP?"
-  assert c.usage.include?('BANNER')
-  assert c.usage.include?('MAGIC')
-  assert c.usage.include?('HELP')
+  assert usage.include?('BANNER')
+  assert usage.include?('MAGIC')
+  assert usage.include?('HELP')
 #end
 
 #it '025 Add to options.errors' do
-  assert options.errors.empty?
+  assert configatron.errors.empty?
   a_message = 'There is a serious problem here'
-  c.error a_message
-  refute c.options.errors.empty?
-  assert_equal 1, c.options.errors.size
-  assert_equal a_message, c.options.errors.first
+  error a_message
+  refute configatron.errors.empty?
+  assert_equal 1, configatron.errors.size
+  assert_equal a_message, configatron.errors.first
 #end
 
 #it '030 Add to options.warnings' do
-  assert c.options.warnings.empty?
+  assert configatron.warnings.empty?
   a_message = 'There is a minor problem here'
-  c.warning a_message
-  refute c.options.warnings.empty?
-  assert_equal 1, c.options.warnings.size
-  assert_equal a_message, c.options.warnings.first
+  warning a_message
+  refute configatron.warnings.empty?
+  assert_equal 1, configatron.warnings.size
+  assert_equal a_message, configatron.warnings.first
 #end
 
 #it '035 Add to options.errors' do
-  refute c.options.errors.empty?
+  refute configatron.errors.empty?
   a_message = 'There is another serious problem here'
-  c.error a_message
-  assert_equal 2, c.options.errors.size
-  assert_equal a_message, c.options.errors.last
+  error a_message
+  assert_equal 2, configatron.errors.size
+  assert_equal a_message, configatron.errors.last
 #end
 
 #it '040 Add to options.warnings' do
-  refute c.warnings.empty?
+  refute configatron.warnings.empty?
   a_message = 'There is a another minor problem here'
-  c.warning a_message
-  assert_equal 2, c.options.warnings.size
-  assert_equal a_message, c.options.warnings.last
+  warning a_message
+  assert_equal 2, configatron.warnings.size
+  assert_equal a_message, configatron.warnings.last
 #end
 
 
@@ -109,31 +111,34 @@ end
 #it '888 prints usage()'  do
   puts
   puts "="*45
-  c.show_usage
+  show_usage
   puts "="*45
   puts
   a_string = <<EOS
 This is my BANNER
 
-Usage: cli_helper.rb [options] ...
+Usage: cli_helper_test.rb [options] ...
 
 Where:
+
   Common Options Are:
     -h, --help     show this message
     -v, --verbose  enable verbose mode
     -d, --debug    enable debug mode
     --version      print the version: 0.0.1
+
   Program Options Are:
     -x, --xyxxy    example MAGIC parameter
 
 Do you need some HELP?
 EOS
 
-  assert_equal a_string, c.usage
+  assert_equal a_string, usage
 #end
 
 #it '999 Show the options structure' do
-  ap c.options
+  puts '*'*45
+  ap configatron
 #end
 
 #end # decribe 'how it works'

@@ -14,9 +14,12 @@ require 'awesome_print'
 require 'pathname'
 require 'nenv'
 
+require 'erb'
+require 'yaml'
+require 'parseconfig'
+
 require 'slop'
 
-=begin
 # Example Custom Type for Slop
 module Slop
   class PathOption < Option
@@ -40,59 +43,62 @@ module Slop
     #end
   end
 end # module Slop
-=end
 
-require 'hashie'
+require 'configatron'
 
-class CliHelper
+module CliHelper
 
-  attr_accessor :options
+  DEFAULTS = {
+    version:        '0.0.1',# the version of this program
+    arguments:      [],     # whats left after options and parameters are extracted
+    verbose:        false,
+    debug:          false,
+    help:           false,
+    support_config_files: false,
+    user_name:      Nenv.user || Nenv.user_name || Nenv.logname || 'Dewayne VanHoozer',
+    home_path:      Pathname.new(Nenv.home),
+    cli:            'a place holder for the Slop object',
+    errors:         [],
+    warnings:       []
+  }
 
-  class Options < Hashie::Mash
-    DEFAULTS = {
-      version:        '0.0.1',# the version of this program
-      arguments:      [],     # whats left after options and parameters are extracted
-      verbose:        false,
-      debug:          false,
-      help:           false,
-      user_name:      Nenv.user || Nenv.user_name || Nenv.logname || 'Dewayne VanHoozer',
-      home_path:      Pathname.new(Nenv.home),
-      cli:            'a place holder for the Slop object',
-      errors:         [],
-      warnings:       []
-    }
+  configatron.configure_from_hash DEFAULTS
 
-    def initialize
-      super(DEFAULTS)
-    end
+  configatron.required_by_filename = caller.last.split(':').first
+  configatron.me       = Pathname.new(configatron.required_by_filename).realpath
+  configatron.my_dir   = Pathname.new(configatron.required_by_filename).realpath.parent
+  configatron.my_name  = Pathname.new(configatron.required_by_filename).realpath.basename.to_s
 
-  end # class Options < Hashie::Mash
-
-  def options
-    @options
-  end
-
-  def initialize
-    @options = Options.new
-    @options.required_by_filename = caller.last.split(':').first
-    @options.me       = Pathname.new(options.required_by_filename).realpath
-    @options.my_dir   = Pathname.new(options.required_by_filename).realpath.parent
-    @options.my_name  = Pathname.new(options.required_by_filename).realpath.basename.to_s
-  end
 
   # Return full pathname of program
   def me
-    options.me
+    configatron.me
   end
 
   # Returns the basename of the program as a string
   def my_name
-    options.my_name
+    configatron.my_name
   end
 
   # Returns the version of the program as a string
   def version
-    options.version
+    configatron.version
+  end
+
+  def cli_helper_process_erb(a_pathname)
+    # TODO: open file; send through erb
+    file_contents = ''
+    return file_contents
+  end
+
+  def cli_helper_process_yaml(file_contents='')
+    a_hash = YAML.parse file_contents
+    return a_hash
+  end
+
+  def cli_helper_process_ini(file_contents='')
+    an_ini_object = ParseConfig.parse(file_contents)
+    return an_ini_object.params
   end
 
   # Invoke Slop with common CLI parameters and custom
@@ -110,44 +116,98 @@ class CliHelper
     end
 
     param.separator "\nWhere:"
-    param.separator "  Common Options Are:"
+    param.separator "\n  Common Options Are:"
 
     param.bool '-h', '--help',    'show this message'
     param.bool '-v', '--verbose', 'enable verbose mode'
     param.bool '-d', '--debug',   'enable debug mode'
 
-    param.on '--version', "print the version: #{options.version}" do
+    param.on '--version', "print the version: #{configatron.version}" do
       puts $options[:version]
       exit
     end
 
-    param.separator "  Program Options Are:"
+    param.separator "\n  Program Options Are:"
 
     yield(param) if block_given?
 
+    if configatron.support_config_files
+      param.paths '--config',    'read config file(s) [*.rb, *.yml, *.ini]'
+    end
+
     parser = Slop::Parser.new(param)
-    options.cli = parser.parse(ARGV)
+    configatron.cli = parser.parse(ARGV)
 
-    options.merge!(options.cli.to_hash)
-    options.arguments = options.cli.arguments
+    # TODO: DRY this conditional block
+    if configatron.support_config_files
+      configatron.cli.config.each do |cf|
+        unless cf.exist? || cf.directory?
+          error "Config file is missing: #{cf}"
+        else
+          file_type = case cf.extname.downcase
+            when '.rb'
+              :ruby
+            when '.yml', '.yaml'
+              :yaml
+            when '.ini', '.txt'
+              :ini
+            when '.erb'
+              extname = cf.basename.downcase.gsub('.erb','')split('.').last
+              if %w[ yml yaml].include? extname
+                :yaml
+              elsif %w[ ini txt ].include? extname
+                :ini
+              else
+                :unknown
+              end
+          else
+            :unknown
+          end
 
+          case type_type
+            when :ruby
+              load cf
+            when :yaml
+              configatron.configure_from_hash(
+                config_file_hash = configatron.configure_from_hash(
+                  cli_helper_process_yaml(
+                    cli_helper_process_erb(cf.read)
+                  )
+                )
+              )
+            when :ini
+              configatron.configure_from_hash(
+                configatron.configure_from_hash(
+                  cli_helper_process_yaml(
+                    cli_helper_process_erb(cf.read)
+                  )
+                )
+              )
+            else
+              error "Do not known how to parse this file: #{cf}"
+          end # case type_type
+        end # unless cf.exist? || cf.directory?
+      end # configatron.cli.config.each do |cf|
+    end # if configatron.support_config_files
+
+    configatron.configure_from_hash(configatron.cli.to_hash)
+    configatron.arguments = configatron.cli.arguments
 
     bools = param.options.select do |o|
       o.is_a? Slop::BoolOption
     end.select{|o| o.flags.select{|f|f.start_with?('--')}}.
         map{|o| o.flags.last.gsub('--','')} # SMELL: depends on convention
 
-=begin
     bools.each do |m|
       s = m.to_sym
-      define_method((m+'?').to_sym) do
-        options[s]
-      end unless self.respond_to?((m+'?').to_sym)
+      define_method(m+'?') do
+        configatron[s]
+      end unless self.respond_to?(m+'?')
       define_method((m+'!').to_sym) do
-        options[s] = true
-      end unless self.respond_to?((m+'!').to_sym)
+        configatron[s] = true
+      end unless self.respond_to?(m+'!')
     end
-=end
+
 
     if help?
       show_usage
@@ -155,12 +215,11 @@ class CliHelper
     end
 
     return param
-  end # def dewaynelovesella
-  cli_helper
+  end # def cli_helper
 
   # Returns the usage/help information as a string
   def usage
-    a_string = options.cli.to_s + "\n"
+    a_string = configatron.cli.to_s + "\n"
     a_string += HELP + "\n" if defined?(HELP)
     return a_string
   end
@@ -191,23 +250,23 @@ class CliHelper
 
   # Display global warnings and errors arrays and exit if necessary
   def abort_if_errors
-    unless $warnings.empty?
+    unless configatron.warnings.empty?
       STDERR.puts
       STDERR.puts "The following warnings were generated:"
       STDERR.puts
-      options.warnings.each do |w|
+      configatron.warnings.each do |w|
         STDERR.puts "\tWarning: #{w}"
       end
       STDERR.print "\nAbort program? (y/N) "
       answer = (STDIN.gets).chomp.strip.downcase
-      $errors << "Aborted by user" if answer.size>0 && 'y' == answer[0]
-      $warnings = []
+      configatron.errors << "Aborted by user" if answer.size>0 && 'y' == answer[0]
+      configatron.warnings = []
     end
-    unless $errors.empty?
+    unless configatron.errors.empty?
       STDERR.puts
       STDERR.puts "Correct the following errors and try again:"
       STDERR.puts
-      options.errors.each do |e|
+      configatron.errors.each do |e|
         STDERR.puts "\t#{e}"
       end
       STDERR.puts
@@ -217,13 +276,13 @@ class CliHelper
 
   # Adds a string to the global $errors array
   def error(a_string)
-    options.errors << a_string
+    configatron.errors << a_string
   end
 
   # Adds a string to the global $warnings array
   def warning(a_string)
-    options.warnings << a_string
+    configatron.warnings << a_string
   end
 
-end # class CliHelper
+end # module CliHelper
 
