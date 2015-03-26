@@ -12,6 +12,12 @@ include CliHelper
 require 'kick_the_tires'
 include KickTheTires
 
+require 'debug_me'
+include DebugMe
+
+
+configatron.support_config_files = true
+
 #describe 'how it works' do
 
 #it '000 supports basic common parameters' do
@@ -22,6 +28,13 @@ include KickTheTires
   assert usage.include?('--verbose')
   assert usage.include?('--version')
   refute usage.include?('--xyzzy')
+
+  if configatron.support_config_files
+    assert usage.include?('--config')
+  else
+    refute usage.include?('--config')
+  end
+
 #end
 
 =begin
@@ -133,12 +146,37 @@ Where:
 Do you need some HELP?
 EOS
 
-  assert_equal a_string, usage
+
+a_string_with_config = <<EOS
+This is my BANNER
+
+Usage: cli_helper_test.rb [options] ...
+
+Where:
+
+  Common Options Are:
+    -h, --help     show this message
+    -v, --verbose  enable verbose mode
+    -d, --debug    enable debug mode
+    --version      print the version: 0.0.1
+
+  Program Options Are:
+    -x, --xyxxy    example MAGIC parameter
+    --config       read config file(s) [*.rb, *.yml, *.ini]
+
+Do you need some HELP?
+EOS
+
+  if configatron.support_config_files
+    assert_equal a_string_with_config, usage
+  else
+    assert_equal a_string, usage
+  end
 #end
 
 #it '999 Show the options structure' do
   puts '*'*45
-  ap configatron
+  ap configatron.to_h
 #end
 
 #end # decribe 'how it works'

@@ -6,9 +6,6 @@
 ##  By:   Dewayne VanHoozer (dvanhoozer@gmail.com)
 #
 
-require 'debug_me'
-#include DebugMe
-
 require 'awesome_print'
 
 require 'pathname'
@@ -85,19 +82,19 @@ module CliHelper
     configatron.version
   end
 
-  def cli_helper_process_erb(a_pathname)
-    # TODO: open file; send through erb
-    file_contents = ''
-    return file_contents
+  def cli_helper_process_erb(file_contents)
+    erb_contents = ERB.new(file_contents).result
+    return erb_contents
   end
 
   def cli_helper_process_yaml(file_contents='')
-    a_hash = YAML.parse file_contents
+    a_hash = YAML.load file_contents
     return a_hash
   end
 
-  def cli_helper_process_ini(file_contents='')
-    an_ini_object = ParseConfig.parse(file_contents)
+  def cli_helper_process_ini(file_path, file_contents='')
+    # FIXME: mod the parseconfig gem to use a parse method on strings
+    an_ini_object = ParseConfig.new(file_path)
     return an_ini_object.params
   end
 
@@ -140,7 +137,8 @@ module CliHelper
 
     # TODO: DRY this conditional block
     if configatron.support_config_files
-      configatron.cli.config.each do |cf|
+
+      configatron.cli[:config].each do |cf|
         unless cf.exist? || cf.directory?
           error "Config file is missing: #{cf}"
         else
@@ -152,7 +150,7 @@ module CliHelper
             when '.ini', '.txt'
               :ini
             when '.erb'
-              extname = cf.basename.downcase.gsub('.erb','')split('.').last
+              extname = cf.basename.downcase.gsub('.erb','').split('.').last
               if %w[ yml yaml].include? extname
                 :yaml
               elsif %w[ ini txt ].include? extname
@@ -164,7 +162,7 @@ module CliHelper
             :unknown
           end
 
-          case type_type
+          case file_type
             when :ruby
               load cf
             when :yaml
@@ -178,13 +176,13 @@ module CliHelper
             when :ini
               configatron.configure_from_hash(
                 configatron.configure_from_hash(
-                  cli_helper_process_yaml(
-                    cli_helper_process_erb(cf.read)
+                  cli_helper_process_ini( cf # FIXME: fork parseconfig
+                    # cli_helper_process_erb(cf.read)
                   )
                 )
               )
             else
-              error "Do not known how to parse this file: #{cf}"
+              error "Do not know how to parse this file: #{cf}"
           end # case type_type
         end # unless cf.exist? || cf.directory?
       end # configatron.cli.config.each do |cf|
