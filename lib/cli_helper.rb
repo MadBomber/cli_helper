@@ -6,15 +6,15 @@
 ##  By:   Dewayne VanHoozer (dvanhoozer@gmail.com)
 #
 
-require 'awesome_print'
-
+# System Libraries
 require 'pathname'
-require 'nenv'
-
 require 'erb'
 require 'yaml'
-require 'parseconfig'
 
+# Third-party gems
+require 'configatron'
+require 'nenv'
+require 'parseconfig'
 require 'slop'
 
 # Example Custom Type for Slop
@@ -41,8 +41,6 @@ module Slop
   end
 end # module Slop
 
-require 'configatron'
-
 module CliHelper
 
   DEFAULTS = {
@@ -52,7 +50,12 @@ module CliHelper
     debug:          false,
     help:           false,
     support_config_files: false,
-    user_name:      Nenv.user || Nenv.user_name || Nenv.logname || 'Dewayne VanHoozer',
+    disable_help:   false,
+    disable_debug:  false,
+    disable_verbose: false,
+    disable_version: false,
+    suppress_errors: false,
+    user_name:      Nenv.user || Nenv.user_name || Nenv.logname || 'The Unknown Programmer',
     home_path:      Pathname.new(Nenv.home),
     cli:            'a place holder for the Slop object',
     errors:         [],
@@ -113,15 +116,33 @@ module CliHelper
     end
 
     param.separator "\nWhere:"
-    param.separator "\n  Common Options Are:"
 
-    param.bool '-h', '--help',    'show this message'
-    param.bool '-v', '--verbose', 'enable verbose mode'
-    param.bool '-d', '--debug',   'enable debug mode'
+    if  configatron.disable_help      &&
+        configatron.disable_verbose   &&
+        configatron.disable_debug     &&
+        configatron.disable_version
+      # NOOP
+    else
+      param.separator "\n  Common Options Are:"
+    end
 
-    param.on '--version', "print the version: #{configatron.version}" do
-      puts $options[:version]
-      exit
+    unless configatron.disable_help
+      param.bool '-h', '--help',    'show this message'
+    end
+
+    unless configatron.disable_verbose
+      param.bool '-v', '--verbose', 'enable verbose mode'
+    end
+
+    unless configatron.disable_debug
+      param.bool '-d', '--debug',   'enable debug mode'
+    end
+
+    unless configatron.disable_version
+      param.on '--version', "print the version: #{configatron.version}" do
+        puts configatron.version
+        exit
+      end
     end
 
     param.separator "\n  Program Options Are:"
@@ -132,7 +153,7 @@ module CliHelper
       param.paths '--config',    'read config file(s) [*.rb, *.yml, *.ini]'
     end
 
-    parser = Slop::Parser.new(param)
+    parser = Slop::Parser.new(param, suppress_errors: configatron.suppress_errors)
     configatron.cli = parser.parse(ARGV)
 
     # TODO: DRY this conditional block
@@ -150,11 +171,13 @@ module CliHelper
             when '.ini', '.txt'
               :ini
             when '.erb'
-              extname = cf.basename.downcase.gsub('.erb','').split('.').last
+              extname = cf.basename.to_s.downcase.gsub('.erb','').split('.').last
               if %w[ yml yaml].include? extname
                 :yaml
               elsif %w[ ini txt ].include? extname
                 :ini
+              elsif 'rb' == extname
+                raise 'MakesNoSenseToMe: *.rb.erb is not supported'
               else
                 :unknown
               end
@@ -207,7 +230,7 @@ module CliHelper
     end
 
 
-    if help?
+    if self.respond_to?(:help?) && help?
       show_usage
       exit
     end

@@ -4,18 +4,20 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = "cli_helper"
-  spec.version       = '0.0.4'
+  spec.version       = '0.1.0'
   spec.authors       = ["Dewayne VanHoozer"]
   spec.email         = ["dvanhoozer@gmail.com"]
 
-  spec.summary       = %q{An encapsulates of common junk used with Q&D CLI utilities.}
-  spec.description   = %q{An encapsulation of a convention I have been using
-   with the slop, nenv, and other gems for quick and dirty development of
-   command-line based utility programs.  Its not pretty.  It may even break
-   your code.  I wouldn't use it if I were you.  You could, if you wanted,
-   namespace this stuff within CliHelper and establish a new convention.
-   You might even wrap not only slop but some of those other ARGV parsers.
-   I only did this much after being shamed into it by rubycritic.}
+  spec.summary       = %q{An encapsulation of an integration of slop, nenv, parseconfig and configatron.}
+  spec.description   = %q{
+     An encapsulation of a convention I have been using
+     with the slop, nenv, parseconfig and configatron gems for quick and dirty
+     development of
+     command-line based utility programs.  Slop parses ARGV; Nenv parses ENV;
+     ParseConfig parses INI; Configatron keeps it all together.  YAML and ERB
+     preprocessing is also available.  Ruby configuration files are also supported.
+     and you can specify multiple config files of mixed types at once.
+  }
   spec.homepage      = "http://github.com/MadBomber/cli_helper"
   spec.license       = "You want it?  It's yours."
 
@@ -26,16 +28,15 @@ Gem::Specification.new do |spec|
     spec.metadata['allowed_push_host'] = 'https://rubygems.org'
   end
 
-  spec.add_dependency 'slop', "~> 4.0"
   spec.add_dependency 'configatron'
-  spec.add_dependency 'parseconfig'
   spec.add_dependency 'nenv'
-  spec.add_dependency 'awesome_print'
-  spec.add_dependency 'debug_me'
-
+  spec.add_dependency 'parseconfig'
+  spec.add_dependency 'slop', "~> 4.0"
 
   spec.add_development_dependency "bundler", "~> 1.9"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency 'kick_the_tires'
+  spec.add_development_dependency 'awesome_print'
+  spec.add_development_dependency 'debug_me'
 
 end

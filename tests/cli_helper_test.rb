@@ -117,6 +117,41 @@ end
   assert_equal a_message, configatron.warnings.last
 #end
 
+#it '050 support erb config files' do
+  unless configatron.config.nil?
+    configatron.config.each do |c|
+      case c.basename.extname.to_s.downcase
+        when '.erb'
+          file_type = c.basename.to_s.downcase.gsub('.erb','').split('.').last
+          case file_type
+            when 'ini'
+              # FIXME: ParseConfig gem has problem
+              refute Time == configatron.wall_clock.the_mouse_says.class
+            when 'txt'
+              # FIXME: ParseConfig gem has problem
+              refute Time == configatron.wrist.watch_time.class
+            when 'yml'
+              assert_equal Time, configatron.production.watch_time.class
+          else
+          end
+        when '.rb'
+          assert_equal 'devhost', configatron.development.host
+        when '.txt'
+          assert_equal 6, configatron.fingers.right_hand
+        when '.ini'
+          assert_equal 'wedding ring', configatron.hands.left_hand
+        when '.yml'
+          assert_equal 'go fish', configatron.production.threes
+          assert configatron.production.watch_time.nil?
+        when '.xyzzy'
+      else
+      end
+    end
+  else
+    # means test did not include config files
+  end
+#end
+
 
 
 
