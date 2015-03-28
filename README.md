@@ -72,7 +72,7 @@ values for host, the command-line value trumps them all.
 
 ## Config files
 
-cli_helpers supports multiple types of configuration files:
+cli_helper supports multiple types of configuration files:
 
 ```text
   *.rb
@@ -140,7 +140,7 @@ The unprocessed options can be access via the arguments array:
 configatron.arguments
 ```
 
-The arguments array is also where you will file anything else from the
+The arguments array is also where you will find anything else from the
 command line that was not processed by the cli_helper.  For example:
 
 ```ruby
@@ -209,7 +209,7 @@ But this one needs some explaining:
 The method get_pathnames_from() returns an array of pathnames matching a specific
 set of file types.  The default types are txt, json and docx because that tends to
 be the majority of the files in which I am interested.  Might add wcml to the default list
-later.  Regardless you propabily ought to provide you own array of file extensions.  And
+later.  Regardless you propabily ought to provide your own array of file extensions.  And
 don't forget the dot!
 
 If an entry in the array is a directory then its children will be search including any sub-directories recursively.
