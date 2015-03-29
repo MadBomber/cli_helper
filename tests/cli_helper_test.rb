@@ -21,7 +21,7 @@ require 'debug_me'
 include DebugMe
 
 
-configatron.support_config_files = true
+configatron.enable_config_files = true
 
 #describe 'how it works' do
 
@@ -34,7 +34,7 @@ configatron.support_config_files = true
   assert usage.include?('--version')
   refute usage.include?('--xyzzy')
 
-  if configatron.support_config_files
+  if configatron.enable_config_files
     assert usage.include?('--config')
   else
     refute usage.include?('--config')
@@ -208,7 +208,7 @@ Where:
 Do you need some HELP?
 EOS
 
-  if configatron.support_config_files
+  if configatron.enable_config_files
     assert_equal a_string_with_config, usage
   else
     assert_equal a_string, usage

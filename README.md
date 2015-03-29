@@ -1,5 +1,14 @@
 # cli_helper
 
+## Most recent changes
+
+### v0.1.2
+
+* replaced the parseconfig gem with the inifile gem -- this now enables the use of ERB in *.ini and *.txt config files
+* changed support_config_files to enable_config_files -- cpmsisten terminology
+
+## Description
+
 If you write lots of command-line utility programs, or
 even if you don't the cli_helper gem can be a helper
 to you.  It integrates several common gems to give
@@ -106,7 +115,7 @@ To enable the support for config files do this before
 calling the #cli_helger() method:
 
 ```ruby
-configatron.support_config_files = true
+configatron.enable_config_files = true
 ```
 
 To disable any of the other common options do this before

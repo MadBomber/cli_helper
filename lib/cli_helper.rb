@@ -49,7 +49,7 @@ module CliHelper
     verbose:        false,
     debug:          false,
     help:           false,
-    support_config_files: false,
+    enable_config_files: false,
     disable_help:   false,
     disable_debug:  false,
     disable_verbose: false,
@@ -156,7 +156,7 @@ module CliHelper
 
     yield(param) if block_given?
 
-    if configatron.support_config_files
+    if configatron.enable_config_files
       param.paths '--config',    'read config file(s) [*.rb, *.yml, *.ini]'
     end
 
@@ -164,7 +164,7 @@ module CliHelper
     configatron.cli = parser.parse(ARGV)
 
     # TODO: DRY this conditional block
-    if configatron.support_config_files
+    if configatron.enable_config_files
 
       configatron.cli[:config].each do |cf|
         unless cf.exist? || cf.directory?
@@ -216,7 +216,7 @@ module CliHelper
           end # case type_type
         end # unless cf.exist? || cf.directory?
       end # configatron.cli.config.each do |cf|
-    end # if configatron.support_config_files
+    end # if configatron.enable_config_files
 
     configatron.configure_from_hash(configatron.cli.to_hash)
     configatron.arguments = configatron.cli.arguments

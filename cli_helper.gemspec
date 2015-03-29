@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = "cli_helper"
-  spec.version       = '0.1.1'
+  spec.version       = '0.1.2'
   spec.authors       = ["Dewayne VanHoozer"]
   spec.email         = ["dvanhoozer@gmail.com"]
 
@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
      with the slop, nenv, inifile and configatron gems for quick and dirty
      development of
      command-line based utility programs.  Slop parses ARGV; Nenv parses ENV;
-     ParseConfig parses INI; Configatron keeps it all together.  YAML and ERB
+     inifile parses INI; Configatron keeps it all together.  YAML and ERB
      preprocessing is also available.  Ruby configuration files are also supported.
      and you can specify multiple config files of mixed types at once.
   }

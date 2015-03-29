@@ -13,7 +13,7 @@ require 'cli_helper'
 include CliHelper
 
 configatron.version = '0.0.1' # the version of this utility program
-configatron.support_config_files = true # default is false
+configatron.enable_config_files = true # default is false
 configatron.disable_help    = false # default is false set true to remove the option
 configatron.disable_verbose = false # ditto
 configatron.disable_debug   = false # ditto
@@ -42,7 +42,7 @@ EOHELP
 # the definition of program-specific options.
 #
 # Default options for help, debug, verbose, and version are automatically inserted
-# by cli_helper.  If configatron.support_config_files is TRUE then a '--config' parameter
+# by cli_helper.  If configatron.enable_config_files is TRUE then a '--config' parameter
 # will also be presented.  '--config' takes a comma-separated list of file paths.  Each
 # config file is processed within cli_helper and results combined within the configatron
 # structure.
