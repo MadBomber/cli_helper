@@ -15,9 +15,9 @@ Here are the gems used and what they do:
   * parses ENV for friendly use
   * http://github.com/e2/nenv
 
-* parseconfig
-  * parses INI files
-  * http://github.com/datafolklabs/ruby-parseconfig
+* inifile
+  * parses INI files (or *.txt if you want to avoid windoze terms)
+  * http://github.com/twp/inifile
 
 * slop
   * parses ARGV
@@ -77,11 +77,11 @@ cli_helper supports multiple types of configuration files:
 ```text
   *.rb
   *.yml
-  *.yml.erb
   *.ini
   *.txt (in the INI format)
-  *.ini.erb  -- not currently supported
-  *.txt.erb  -- not currenly supported
+  *.ini.erb
+  *.txt.erb
+  *.yml.erb
 ```
 
 All values obtained from config files and command line parameters are
@@ -149,6 +149,15 @@ my_program.rb -v *.txt
 
 The file names matching the '*.txt' glob will be put into the configatron.arguments
 array.
+
+When process INI or TXT config files the following options can
+be useful:
+
+```ruby
+configatron.ini_comment   # default: '#'
+configatron.ini_encoding  # default: 'UTF-8'
+configatron.ini_seperator # default: '='
+```
 
 
 ## Boolean options auto-generate methods

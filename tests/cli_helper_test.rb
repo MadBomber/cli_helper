@@ -2,6 +2,11 @@
 ################################################
 ## Here is how it works
 
+require 'timecop'
+
+# Freeze time for the erb tests
+Timecop.freeze(Time.now)
+
 require_relative '../lib/cli_helper'
 include CliHelper
 
@@ -125,13 +130,14 @@ end
           file_type = c.basename.to_s.downcase.gsub('.erb','').split('.').last
           case file_type
             when 'ini'
-              # FIXME: ParseConfig gem has problem
-              refute Time == configatron.wall_clock.the_mouse_says.class
+              assert_equal String, configatron.wall_clock.the_mouse_says.class
+              assert_equal Time.now, configatron.wall_clock.the_mouse_says
             when 'txt'
-              # FIXME: ParseConfig gem has problem
-              refute Time == configatron.wrist.watch_time.class
+              assert_equal String, configatron.wrist.watch_time.class
+              assert_equal Time.now, configatron.wrist.watch_time
             when 'yml'
               assert_equal Time, configatron.production.watch_time.class
+              assert_equal Time.now, configatron.production.watch_time
           else
           end
         when '.rb'

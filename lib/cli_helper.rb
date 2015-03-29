@@ -14,7 +14,7 @@ require 'yaml'
 # Third-party gems
 require 'configatron'
 require 'nenv'
-require 'parseconfig'
+require 'inifile'
 require 'slop'
 
 # Example Custom Type for Slop
@@ -55,6 +55,9 @@ module CliHelper
     disable_verbose: false,
     disable_version: false,
     suppress_errors: false,
+    ini_comment:    '#',
+    ini_seperator:  '=',
+    ini_encoding:   'UTF-8',
     user_name:      Nenv.user || Nenv.user_name || Nenv.logname || 'The Unknown Programmer',
     home_path:      Pathname.new(Nenv.home),
     cli:            'a place holder for the Slop object',
@@ -95,10 +98,14 @@ module CliHelper
     return a_hash
   end
 
-  def cli_helper_process_ini(file_path, file_contents='')
-    # FIXME: mod the parseconfig gem to use a parse method on strings
-    an_ini_object = ParseConfig.new(file_path)
-    return an_ini_object.params
+  def cli_helper_process_ini(file_contents='')
+    an_ini_object = IniFile.new(
+                      content: file_contents,
+                      comment: configatron.ini_comment,
+                      parameter: configatron.ini_seperator,
+                      encoding: configatron.ini_encoding
+                    )
+    return an_ini_object.to_h
   end
 
   # Invoke Slop with common CLI parameters and custom
@@ -199,8 +206,8 @@ module CliHelper
             when :ini
               configatron.configure_from_hash(
                 configatron.configure_from_hash(
-                  cli_helper_process_ini( cf # FIXME: fork parseconfig
-                    # cli_helper_process_erb(cf.read)
+                  cli_helper_process_ini(
+                    cli_helper_process_erb(cf.read)
                   )
                 )
               )
