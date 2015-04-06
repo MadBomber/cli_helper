@@ -203,7 +203,7 @@ Where:
 
   Program Options Are:
     -x, --xyxxy    example MAGIC parameter
-    --config       read config file(s) [*.rb, *.yml, *.ini]
+    --config       read config file(s) [*.rb, *.yml, *.ini, *.erb]
 
 Do you need some HELP?
 EOS

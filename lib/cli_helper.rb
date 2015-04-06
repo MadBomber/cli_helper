@@ -108,6 +108,66 @@ module CliHelper
     return an_ini_object.to_h
   end
 
+  def cli_helper_process_config_file(a_cf)
+    cf = String == a_cf.class ? Pathname.new(a_cf) : a_cf
+    if cf.directory?
+      cf.children.each do |ccf|
+        cli_helper_process_config_file(ccf)
+      end
+      return
+    end
+    unless cf.exist?
+      error "Config file is missing: #{cf}"
+    else
+      file_type = case cf.extname.downcase
+        when '.rb'
+          :ruby
+        when '.yml', '.yaml'
+          :yaml
+        when '.ini', '.txt'
+          :ini
+        when '.erb'
+          extname = cf.basename.to_s.downcase.gsub('.erb','').split('.').last
+          if %w[ yml yaml].include? extname
+            :yaml
+          elsif %w[ ini txt ].include? extname
+            :ini
+          elsif 'rb' == extname
+            warning 'MakesNoSenseToMe: *.rb.erb is not supported'
+            :unknown
+          else
+            :unknown
+          end
+      else
+        :unknown
+      end
+
+      case file_type
+        when :ruby
+          load cf
+        when :yaml
+          configatron.configure_from_hash(
+            config_file_hash = configatron.configure_from_hash(
+              cli_helper_process_yaml(
+                cli_helper_process_erb(cf.read)
+              )
+            )
+          )
+        when :ini
+          configatron.configure_from_hash(
+            configatron.configure_from_hash(
+              cli_helper_process_ini(
+                cli_helper_process_erb(cf.read)
+              )
+            )
+          )
+        else
+          error "Do not know how to parse this file: #{cf}"
+      end # case type_type
+    end # unless cf.exist? || cf.directory?
+  end # def cli_helper_process_config_file(cf)
+
+
   # Invoke Slop with common CLI parameters and custom
   # parameters provided via a block.  Create '?'
   # for all boolean parameters that have a '--name' flag form.
@@ -157,64 +217,19 @@ module CliHelper
     yield(param) if block_given?
 
     if configatron.enable_config_files
-      param.paths '--config',    'read config file(s) [*.rb, *.yml, *.ini]'
+      param.paths '--config',    'read config file(s) [*.rb, *.yml, *.ini, *.erb]'
     end
 
     parser = Slop::Parser.new(param, suppress_errors: configatron.suppress_errors)
     configatron.cli = parser.parse(ARGV)
 
-    # TODO: DRY this conditional block
+    # NOTE: The config files are being process before the
+    #       command line options in order for the command
+    #       line options to over-write the values from the
+    #       config files.
     if configatron.enable_config_files
-
       configatron.cli[:config].each do |cf|
-        unless cf.exist? || cf.directory?
-          error "Config file is missing: #{cf}"
-        else
-          file_type = case cf.extname.downcase
-            when '.rb'
-              :ruby
-            when '.yml', '.yaml'
-              :yaml
-            when '.ini', '.txt'
-              :ini
-            when '.erb'
-              extname = cf.basename.to_s.downcase.gsub('.erb','').split('.').last
-              if %w[ yml yaml].include? extname
-                :yaml
-              elsif %w[ ini txt ].include? extname
-                :ini
-              elsif 'rb' == extname
-                raise 'MakesNoSenseToMe: *.rb.erb is not supported'
-              else
-                :unknown
-              end
-          else
-            :unknown
-          end
-
-          case file_type
-            when :ruby
-              load cf
-            when :yaml
-              configatron.configure_from_hash(
-                config_file_hash = configatron.configure_from_hash(
-                  cli_helper_process_yaml(
-                    cli_helper_process_erb(cf.read)
-                  )
-                )
-              )
-            when :ini
-              configatron.configure_from_hash(
-                configatron.configure_from_hash(
-                  cli_helper_process_ini(
-                    cli_helper_process_erb(cf.read)
-                  )
-                )
-              )
-            else
-              error "Do not know how to parse this file: #{cf}"
-          end # case type_type
-        end # unless cf.exist? || cf.directory?
+        cli_helper_process_config_file(cf)
       end # configatron.cli.config.each do |cf|
     end # if configatron.enable_config_files
 

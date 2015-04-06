@@ -2,6 +2,11 @@
 
 ## Most recent changes
 
+### v0.1.3
+
+* added ability to process a directory of config files
+* added ability to process a default set of config files that could get over-written by specific config files specified on the command line
+
 ### v0.1.2
 
 * replaced the parseconfig gem with the inifile gem -- this now enables the use of ERB in *.ini and *.txt config files

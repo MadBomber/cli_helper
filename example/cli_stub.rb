@@ -9,16 +9,33 @@
 
 require 'awesome_print'
 
-require 'cli_helper'
+require '../lib/cli_helper'
 include CliHelper
 
-configatron.version = '0.0.1' # the version of this utility program
+configatron.version = '0.0.2' # the version of this utility program
 configatron.enable_config_files = true # default is false
 configatron.disable_help    = false # default is false set true to remove the option
 configatron.disable_verbose = false # ditto
 configatron.disable_debug   = false # ditto
 configatron.disable_version = false # ditto
 configatron.suppress_errors = false # set to true to eat exceptions; unknown options added to arguments
+
+
+# Sometimes you may have a few default config files that you
+# want to apply before the command-line options.  Do it like
+# something like this:
+%w[
+  ../tests/config/sample.yml
+  ../tests/config/sample.yml.erb
+].each do |dcf|
+  cli_helper_process_config_file(dcf)
+end
+
+# OR just pass a directory and all of the config files in the
+# directory will be processed:
+
+cli_helper_process_config_file('../tests/config')
+
 
 # HELP is extra stuff shown with usage.  It is optional.  You
 # can put anything you want into it.  Since it is optional, it
