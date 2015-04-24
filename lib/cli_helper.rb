@@ -31,6 +31,12 @@ module Slop
     end
   end
 
+  class SymbolOption < Option
+    def call(value)
+      value.to_sym
+    end
+  end
+
   # An example of how to incorporate default values into
   # the usage help text.  Would prefer a generic solution
   # in the base Option class.
@@ -77,6 +83,12 @@ module CliHelper
   def me
     configatron.me
   end
+
+  # Return full pathname of program
+  def my_dir
+    configatron.my_dir
+  end
+  alias :root :my_dir
 
   # Returns the basename of the program as a string
   def my_name
