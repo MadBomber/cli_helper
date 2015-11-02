@@ -296,7 +296,15 @@ module CliHelper
       if pfn.directory?
         file_array << get_pathnames_from(pfn.children, extnames)
       else
-        file_array << pfn if pfn.exist? && extnames.include?(pfn.extname.downcase)
+        if pfn.exist?
+          if extnames.include?(pfn.extname.downcase)
+            file_array << pfn
+          else
+            error "File extension is not #{extnames.join(' or ')} file: #{pfn}"
+          end
+        else
+          error "File does not exist: #{pfn}"
+        end
       end
     end
     return file_array.flatten
