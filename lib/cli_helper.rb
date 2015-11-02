@@ -342,9 +342,17 @@ module CliHelper
     configatron.errors << a_string
   end
 
+  def errors
+    configatron.errors
+  end
+
   # Adds a string to the global $warnings array
   def warning(a_string)
     configatron.warnings << a_string
+  end
+
+  def warnings
+    configatron.warnings
   end
 
 end # module CliHelper
