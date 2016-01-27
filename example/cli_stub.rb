@@ -13,7 +13,7 @@ require '../lib/cli_helper'
 include CliHelper
 
 configatron.version = '0.0.2' # the version of this utility program
-configatron.enable_config_files = true # default is false
+configatron.enable_config_files = false # default is false
 configatron.disable_help    = false # default is false set true to remove the option
 configatron.disable_verbose = false # ditto
 configatron.disable_debug   = false # ditto
@@ -23,18 +23,21 @@ configatron.suppress_errors = false # set to true to eat exceptions; unknown opt
 
 # Sometimes you may have a few default config files that you
 # want to apply before the command-line options.  Do it like
-# something like this:
+# this:
+
+=begin
 %w[
   ../tests/config/sample.yml
   ../tests/config/sample.yml.erb
 ].each do |dcf|
   cli_helper_process_config_file(dcf)
 end
+=end
 
 # OR just pass a directory and all of the config files in the
 # directory will be processed:
 
-cli_helper_process_config_file('../tests/config')
+#  cli_helper_process_config_file('../tests/config')
 
 
 # HELP is extra stuff shown with usage.  It is optional.  You
@@ -66,7 +69,7 @@ EOHELP
 #
 # -h, --help will automatically show a usage message on STDOUT and exit the program
 # --version will print the program's version string to STDOUT and exit
-# =v, --verbose will set the verbose boolean to true.
+# -v, --verbose will set the verbose boolean to true.
 # -d, --debug will set the debug boolean to true.
 # All boolean options have '?' and '!' methods generated,  For example debug? and
 # verbose? are automatically generated.  Any program-specific booleans specified will
@@ -78,24 +81,31 @@ cli_helper("An example use of cli_helper") do |o|
   # For a complete list of stuff see Slop on github.com
   # https://github.com/leejarvis/slop
 
+  # boolean parameters will also generate the methods long-parameter? and long-parameter!
+  # for example this line:
+  o.bool    '-b', '--bullstuff', default: false
+
+  # will auto generate the methods bullstuff? and bullstuff!
+  # where bullstuff? returns the value of configatron.bullstuff
+  #   and bullstuff! sets the value of configatron.bullstuff to true
+
   o.string  '-s', '--string', 'example string parameter',  default: 'IamDefault'
+  o.string  '-r', '--required', 'a required parameter'     # I know its required because there is no default
   o.int     '-i', '--int',    'example integer parameter', default: 42
-
-  # FIXME: an issue with Slop
-  #o.float   '-f', '--float',  'example float parameter', default: (22.0 / 7.0)
-
+  o.float   '-f', '--float',  'example float parameter', default: (22.0 / 7.0)
   o.array   '-a', '--array',  'example array parameter',   default: [:bob, :carol, :ted, :alice]
   o.path    '-p', '--path',   'example Pathname parameter', default: Pathname.new('default/path/to/file.txt')
   o.paths         '--paths',  'example Pathnames parameter', delimiter: ',', default: ['default/path/to/file.txt',
 'file2.txt'].map{|f| Pathname.new f}
 
-  # FIXME: Issue with Slop; default is not passed to the block.  When no parameter is
-  #        given, an exception is raised.  Using the suppress_errors: true option silents
-  #        the exception BUT still the default value is not passed to the block.
-  #        This issue has been raised with the Slop author and a fix is in the works.
   o.string '-n', '--name', 'print Hello <name>', default: 'World!', suppress_errors: true do |a_string|
     a_string = 'world' if a_string.empty?
     puts "Hello #{a_string}"
+  end
+
+  o.on '--quit', "print 'Take this option and do it!' and then exit" do
+    puts 'Take this option and do it!'
+    exit
   end
 
 end
@@ -171,4 +181,7 @@ stub = <<EOS
 EOS
 
 puts stub
+
+puts "\n\nHello #{configatron.name}\n\n"
+
 
