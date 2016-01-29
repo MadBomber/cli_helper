@@ -160,9 +160,7 @@ end
 
 
 
-
-
-#it '888 prints usage()'  do
+#it '060 prints usage()'  do
   puts
   puts "="*45
   show_usage
@@ -214,6 +212,102 @@ EOS
     assert_equal a_string, usage
   end
 #end
+
+#it '070 warns about multiple uses of a paramager on the command line' do
+  ARGV = "-n Tom -n Dick -n Harry".split
+  configatron.warnings = []
+  assert configatron.warnings.empty?
+
+  cli_helper do |o|
+    o.string '-n', '--name', 'Hello <name>'
+  end
+
+  assert_equal 1, configatron.warnings.size
+  assert configatron.warnings.first.include?('entered more than once; only last value is used')
+#end
+
+
+#it '080 warns about missiong value and undefined flag' do
+  ARGV = "--WooWho -n".split
+  configatron.warnings = []
+  configatron.errors   = []
+  assert configatron.warnings.empty?
+
+  cli_helper do |o|
+    o.string '-n', '--name', 'Hello <name>'
+  end
+
+  assert_equal 1, configatron.warnings.size
+  assert_equal 'Required parameter is missing: Hello <name> ["-n", "--name"]', configatron.warnings.first
+
+  assert_equal 1, configatron.errors.size
+  assert_equal 'Invalid parameters: ["--WooWho"]', configatron.errors.first
+#end
+
+
+#it '090 generates exception' do
+  # Do not recommend using exceptions to communicate errors and warnings.
+  # because only one exception can be generated at a time.  Its better to
+  # alert the user to all known problems than to just detect and report
+  # only one problem at a time.
+
+  ARGV = "--WooWho -n".split  # This string has two errors but only one will be deteched.
+  configatron.warnings = []
+  configatron.errors   = []
+  assert configatron.warnings.empty?
+
+  configatron.suppress_errors = false
+
+  exception_text = 'there was no exception'
+
+  begin
+    cli_helper do |o|
+      o.string '-n', '--name', 'Hello <name>'
+    end
+  rescue Exception => e
+    exception_text = e
+  end
+
+  assert_equal "unknown option `--WooWho'", exception_text
+
+  assert_equal 0, configatron.warnings.size
+  assert_equal 0, configatron.errors.size
+#end
+
+#it '092 generates exception' do
+  # Do not recommend using exceptions to communicate errors and warnings.
+  # because only one exception can be generated at a time.  Its better to
+  # alert the user to all known problems than to just detect and report
+  # only one problem at a time.
+
+  # change the order from the previous test does not change the results
+  # because the first this that is checked by Slop is unknown flags.  Then it checks
+  # for missing arguments in the remaining flags.  Slop will generate an exception
+  # on the first error it finds.  There is no way to cause Slop to resume checking
+  # the remaining command line parameters.
+  ARGV = "-n".split  # This string has no unknown flags.
+  configatron.warnings = []
+  configatron.errors   = []
+  assert configatron.warnings.empty?
+
+  configatron.suppress_errors = false
+
+  exception_text = 'there was no exception'
+
+  begin
+    cli_helper do |o|
+      o.string '-n', '--name', 'Hello <name>'
+    end
+  rescue Exception => e
+    exception_text = e
+  end
+
+  assert_equal "missing argument for -n, --name", exception_text
+
+  assert_equal 0, configatron.warnings.size
+  assert_equal 0, configatron.errors.size
+#end
+
 
 #it '999 Show the options structure' do
   puts '*'*45

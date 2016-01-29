@@ -7,18 +7,21 @@
 ##  By:   Dewayne VanHoozer (dvanhoozer@gmail.com)
 #
 
+require 'debug_me'
+include DebugMe
+
 require 'awesome_print'
 
 require '../lib/cli_helper'
 include CliHelper
 
-configatron.version = '0.0.2' # the version of this utility program
+configatron.version = '0.0.3' # the version of this utility program
 configatron.enable_config_files = false # default is false
 configatron.disable_help    = false # default is false set true to remove the option
 configatron.disable_verbose = false # ditto
 configatron.disable_debug   = false # ditto
 configatron.disable_version = false # ditto
-configatron.suppress_errors = false # set to true to eat exceptions; unknown options added to arguments
+configatron.suppress_errors = true  # default is true; set to false to receive exceptions from Slop
 
 
 # Sometimes you may have a few default config files that you
@@ -88,15 +91,37 @@ cli_helper("An example use of cli_helper") do |o|
   # will auto generate the methods bullstuff? and bullstuff!
   # where bullstuff? returns the value of configatron.bullstuff
   #   and bullstuff! sets the value of configatron.bullstuff to true
+  #
+  # NOTE: boolean options are special in that default: false is assumed
+  #       when no default item is provided.  This means that
+  #         o.bool '-e', 'Example', default: false
+  #   and   o.bool '-e', 'Example'
+  #   are treated identically.  The value for the parameter will be false when the
+  #   parameter is included on the command line.
+  #
+  #   This is NOT the case for other parameter classes.  For them, if no default is
+  #   provided AND they are not present on the command line, THEN their value will be
+  #   nil AND they will (by convention) be treated as a required parameter that has
+  #   not been provided.  This will result in a warning message being generated.
+
 
   o.string  '-s', '--string', 'example string parameter',  default: 'IamDefault'
   o.string  '-r', '--required', 'a required parameter'     # I know its required because there is no default
-  o.int     '-i', '--int',    'example integer parameter', default: 42
+  o.bool          '--xyzzy',  'a required boolean without a default', required: true
+  
+  # NOTE: you can use many "flags" in defining an option.  Each is valid on the command line.
+  # However, only the last flag can be used to retrieve the value via the configatron capability.
+  # To get the value entered by the user for this integer parameter you must use:
+  #    configatron.i3  or  configatron['i3']  or  configatron[:i3]
+
+  o.int     '-i', '--i2', '--i3', 'example integer parameter', default: 42
+
+
   o.float   '-f', '--float',  'example float parameter', default: (22.0 / 7.0)
   o.array   '-a', '--array',  'example array parameter',   default: [:bob, :carol, :ted, :alice]
   o.path    '-p', '--path',   'example Pathname parameter', default: Pathname.new('default/path/to/file.txt')
-  o.paths         '--paths',  'example Pathnames parameter', delimiter: ',', default: ['default/path/to/file.txt',
-'file2.txt'].map{|f| Pathname.new f}
+  o.paths         '--paths',  'example Pathnames parameter', delimiter: ',', 
+    default: ['default/path/to/file.txt', 'file2.txt'].map{|f| Pathname.new f}
 
   o.string '-n', '--name', 'print Hello <name>', default: 'World!', suppress_errors: true do |a_string|
     a_string = 'world' if a_string.empty?
@@ -135,8 +160,6 @@ if configatron.arguments.include?('warning')
 end
 
 =begin
-
-rescue
   configatron.errors and configatron.warnings are of type Array.
   All warnings will be presented to the user.  The user will
   be asked wither the program should be aborted.
@@ -182,6 +205,42 @@ EOS
 
 puts stub
 
-puts "\n\nHello #{configatron.name}\n\n"
+# The values of command line parameters are available anywhere via configatron as
+# either methods or hash keys.  The name of the method/key is the name of the
+# last "flag" defined for that option.  For example the name option was defined
+# with the flags "-n" and "--name" so you can access that parameter like this:
 
+puts "\n\nHello #{configatron.name}"
+
+# or like this:
+
+puts "Hello #{configatron['name']}"
+
+# or like this:
+
+puts "Hello #{configatron[:name]}\n\n"
+
+__END__
+
+The same thing is true if only a single letter "-z" is used.
+Access the value like this:
+
+  configatron.z
+  configatron['z']
+  configatron[:z]
+
+Regardless of how many "flags" are defined for an option, it is only the
+last one in the list that is used to access its value.  In the "name" example
+about you CANNOT access the value via configatron.n because "--name" was the
+last flag defined for the option.
+
+When the user enters a "flag" more than once on a command line only the value of
+The last entry will be kept.
+
+Run this program with the following parameters and see what happens:
+
+  -n Tom -n Dick -n Harry
+
+you should get a warning that there were multiple entries on the command
+line.  The value that is used will be the last one - "Harry"
 
