@@ -64,7 +64,7 @@ module CliHelper
     ini_comment:    '#',
     ini_seperator:  '=',
     ini_encoding:   'UTF-8',
-    user_name:      Nenv.user || Nenv.user_name || Nenv.logname || 'The Unknown Programmer',
+    user_name:      Nenv.user || Nenv.user_name || Nenv.logname || 'The Unknown User',
     home_path:      Pathname.new(Nenv.home),
     cli:            'a place holder for the Slop object',
     errors:         [],
@@ -75,8 +75,8 @@ module CliHelper
 
   configatron.required_by_filename = caller.last.split(':').first
   configatron.me       = Pathname.new(configatron.required_by_filename).realpath
-  configatron.my_dir   = Pathname.new(configatron.required_by_filename).realpath.parent
-  configatron.my_name  = Pathname.new(configatron.required_by_filename).realpath.basename.to_s
+  configatron.my_dir   = configatron.me.parent
+  configatron.my_name  = configatron.me.basename.to_s
 
 
   # Return full pathname of program
@@ -84,32 +84,41 @@ module CliHelper
     configatron.me
   end
 
+
   # Return full pathname of program
   def my_dir
     configatron.my_dir
   end
   alias :root :my_dir
 
+
   # Returns the basename of the program as a string
   def my_name
     configatron.my_name
   end
+
 
   # Returns the version of the program as a string
   def version
     configatron.version
   end
 
+
+  # Extract options and values from an ERB formatted config file
   def cli_helper_process_erb(file_contents)
     erb_contents = ERB.new(file_contents).result
     return erb_contents
   end
 
+
+  # Extract options and values from a YAML formatted config file
   def cli_helper_process_yaml(file_contents='')
     a_hash = YAML.load file_contents
     return a_hash
   end
 
+
+  # Extract options and values from an INI formated config file
   def cli_helper_process_ini(file_contents='')
     an_ini_object = IniFile.new(
                       content: file_contents,
@@ -120,6 +129,8 @@ module CliHelper
     return an_ini_object.to_h
   end
 
+
+  # Obtain options and values from a config file
   def cli_helper_process_config_file(a_cf)
     cf = String == a_cf.class ? Pathname.new(a_cf) : a_cf
     if cf.directory?
@@ -310,6 +321,7 @@ module CliHelper
     return param
   end # def cli_helper
 
+
   # Returns the usage/help information as a string
   def usage
     a_string = configatron.cli.to_s + "\n"
@@ -317,13 +329,16 @@ module CliHelper
     return a_string
   end
 
+
   # Prints to STDOUT the usage/help string
   def show_usage
     puts usage()
   end
 
 
-  # Returns an array of valid files of one type
+  # Returns an array of valid files of valid type(s)
+  # Creates warnings for files not matching the valid extensions.
+  # Generates errors fpr files that do not exist
   def get_pathnames_from(an_array, extnames=['.json', '.txt', '.docx'])
     an_array = [an_array] unless an_array.is_a? Array
     extnames = [extnames] unless extnames.is_a? Array
@@ -338,7 +353,7 @@ module CliHelper
           if extnames.include?(pfn.extname.downcase)
             file_array << pfn
           else
-            error "File extension is not #{extnames.join(' or ')} file: #{pfn}"
+            warning "File ignored because extension is not #{extnames.join(' or ')} file: #{pfn}"
           end
         else
           error "File does not exist: #{pfn}"
@@ -375,20 +390,26 @@ module CliHelper
     end
   end # def abort_if_errors
 
+
   # Adds a string to the global $errors array
   def error(a_string)
     configatron.errors << a_string
   end
 
+
+  # Returns an Array of errors
   def errors
     configatron.errors
   end
+
 
   # Adds a string to the global $warnings array
   def warning(a_string)
     configatron.warnings << a_string
   end
 
+
+  # Returns an Array of warnings
   def warnings
     configatron.warnings
   end

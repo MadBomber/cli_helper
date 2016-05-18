@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = "cli_helper"
-  spec.version       = '0.1.7'
+  spec.version       = '0.1.8'
   spec.authors       = ["Dewayne VanHoozer"]
   spec.email         = ["dvanhoozer@gmail.com"]
 
@@ -33,8 +33,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'inifile'
   spec.add_dependency 'slop', "~> 4.2"
 
-  spec.add_development_dependency "bundler", "~> 1.9"
-  spec.add_development_dependency "rake", "~> 10.0"
+  spec.add_development_dependency "bundler"
+  spec.add_development_dependency "rake"
   spec.add_development_dependency 'kick_the_tires'
   spec.add_development_dependency 'awesome_print'
   spec.add_development_dependency 'debug_me'
