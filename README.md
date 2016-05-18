@@ -2,15 +2,16 @@
 
 ## Most recent changes
 
+### v0.1.8
+
+* Changed #get_pathnames_from to issue warnings in place of errors for files that do not have the correct file extension
+* Added some more comments to the code
+
 ### v0.1.3
 
 * added ability to process a directory of config files
 * added ability to process a default set of config files that could get over-written by specific config files specified on the command line
 
-### v0.1.2
-
-* replaced the parseconfig gem with the inifile gem -- this now enables the use of ERB in *.ini and *.txt config files
-* changed support_config_files to enable_config_files -- cpmsisten terminology
 
 ## Description
 
