@@ -15,7 +15,7 @@ require 'awesome_print'
 require '../lib/cli_helper'
 include CliHelper
 
-configatron.version = '0.0.3' # the version of this utility program
+configatron.version = '0.1.9' # the version of this utility program
 configatron.enable_config_files = false # default is false
 configatron.disable_help    = false # default is false set true to remove the option
 configatron.disable_verbose = false # ditto
@@ -108,7 +108,7 @@ cli_helper("An example use of cli_helper") do |o|
   o.string  '-s', '--string', 'example string parameter',  default: 'IamDefault'
   o.string  '-r', '--required', 'a required parameter'     # I know its required because there is no default
   o.bool          '--xyzzy',  'a required boolean without a default', required: true
-  
+
   # NOTE: you can use many "flags" in defining an option.  Each is valid on the command line.
   # However, only the last flag can be used to retrieve the value via the configatron capability.
   # To get the value entered by the user for this integer parameter you must use:
@@ -120,7 +120,7 @@ cli_helper("An example use of cli_helper") do |o|
   o.float   '-f', '--float',  'example float parameter', default: (22.0 / 7.0)
   o.array   '-a', '--array',  'example array parameter',   default: [:bob, :carol, :ted, :alice]
   o.path    '-p', '--path',   'example Pathname parameter', default: Pathname.new('default/path/to/file.txt')
-  o.paths         '--paths',  'example Pathnames parameter', delimiter: ',', 
+  o.paths         '--paths',  'example Pathnames parameter', delimiter: ',',
     default: ['default/path/to/file.txt', 'file2.txt'].map{|f| Pathname.new f}
 
   o.string '-n', '--name', 'print Hello <name>', default: 'World!', suppress_errors: true do |a_string|

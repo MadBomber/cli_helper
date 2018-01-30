@@ -2,6 +2,10 @@
 
 ## Most recent changes
 
+### v0.1.9
+
+* Changed gemspec to use slop ~> 4.6
+
 ### v0.1.8
 
 * Changed #get_pathnames_from to issue warnings in place of errors for files that do not have the correct file extension
