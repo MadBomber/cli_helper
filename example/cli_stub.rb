@@ -10,7 +10,7 @@
 require 'debug_me'
 include DebugMe
 
-require 'awesome_print'
+require 'amazing_print'
 
 require '../lib/cli_helper'
 include CliHelper

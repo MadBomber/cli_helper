@@ -2,6 +2,10 @@
 
 ## Most recent changes
 
+### v0.1.9.1
+
+* Adopting the amazing_print fork of awesome_print.
+
 ### v0.1.9
 
 * Changed gemspec to use slop ~> 4.6
