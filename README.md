@@ -4,7 +4,7 @@
 
 ### v0.1.9.1
 
-* Adopting the amazing_print fork of awesome_print.
+* Adopting the amazing_print fork of awesome_print for development.  Its not used in the main gem, just I like to use it while developing.  Doesn't everyone?
 
 ### v0.1.9
 
