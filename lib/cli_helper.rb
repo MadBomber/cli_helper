@@ -195,12 +195,13 @@ module CliHelper
   # parameters provided via a block.  Create '?'
   # for all boolean parameters that have a '--name' flag form.
   # Returns a Slop::Options object
-  def cli_helper( my_banner='', 
+  def cli_helper( my_banner='',
                   slop_options_config={}
                 )
-    default_config = { suppress_errors: configatron.suppress_errors }
+    default_config  = { suppress_errors: configatron.suppress_errors }
+    options_hash    = default_config.merge(slop_options_config)
 
-    param = Slop::Options.new( default_config.merge(slop_options_config) )
+    param = Slop::Options.new( **options_hash )
 
     if my_banner.empty?
       param.banner = "Usage: #{my_name} [options] ..."
