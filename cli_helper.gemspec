@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
      and you can specify multiple config files of mixed types at once.
   }
   spec.homepage      = "http://github.com/MadBomber/cli_helper"
+  spec.required_ruby_version = ">= 4.0"
   spec.license       = "You want it?  It's yours."
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
